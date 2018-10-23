@@ -25,7 +25,6 @@ import org.apache.sling.feature.Feature;
 import org.apache.sling.feature.FeatureConstants;
 import org.apache.sling.feature.builder.BuilderContext;
 import org.apache.sling.feature.builder.FeatureBuilder;
-import org.apache.sling.feature.builder.FeatureExtensionHandler;
 import org.apache.sling.feature.builder.MergeHandler;
 import org.apache.sling.feature.builder.PostProcessHandler;
 import org.apache.sling.feature.io.file.ArtifactHandler;
@@ -83,8 +82,6 @@ public class FeatureProcessor {
                 }
             },
             config.getVariables(), config.getInstallation().getFrameworkProperties())
-                .add(StreamSupport.stream(Spliterators.spliteratorUnknownSize(
-                        ServiceLoader.load(FeatureExtensionHandler.class).iterator(), Spliterator.ORDERED), false).toArray(FeatureExtensionHandler[]::new))
                 .addMergeExtensions(StreamSupport.stream(Spliterators.spliteratorUnknownSize(
                         ServiceLoader.load(MergeHandler.class).iterator(), Spliterator.ORDERED), false)
                             .toArray(MergeHandler[]::new))
