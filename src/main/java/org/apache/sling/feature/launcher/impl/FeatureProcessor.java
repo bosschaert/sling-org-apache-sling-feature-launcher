@@ -16,6 +16,24 @@
  */
 package org.apache.sling.feature.launcher.impl;
 
+import org.apache.sling.feature.Artifact;
+import org.apache.sling.feature.ArtifactId;
+import org.apache.sling.feature.Configuration;
+import org.apache.sling.feature.Extension;
+import org.apache.sling.feature.ExtensionType;
+import org.apache.sling.feature.Feature;
+import org.apache.sling.feature.FeatureConstants;
+import org.apache.sling.feature.builder.BuilderContext;
+import org.apache.sling.feature.builder.FeatureBuilder;
+import org.apache.sling.feature.builder.FeatureExtensionHandler;
+import org.apache.sling.feature.builder.MergeHandler;
+import org.apache.sling.feature.builder.PostProcessHandler;
+import org.apache.sling.feature.io.file.ArtifactHandler;
+import org.apache.sling.feature.io.file.ArtifactManager;
+import org.apache.sling.feature.io.json.FeatureJSONReader;
+import org.apache.sling.feature.launcher.spi.LauncherPrepareContext;
+import org.apache.sling.feature.launcher.spi.extensions.ExtensionHandler;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -28,22 +46,6 @@ import java.util.ServiceLoader;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.stream.StreamSupport;
-
-import org.apache.sling.feature.Artifact;
-import org.apache.sling.feature.ArtifactId;
-import org.apache.sling.feature.Configuration;
-import org.apache.sling.feature.Extension;
-import org.apache.sling.feature.ExtensionType;
-import org.apache.sling.feature.Feature;
-import org.apache.sling.feature.FeatureConstants;
-import org.apache.sling.feature.builder.BuilderContext;
-import org.apache.sling.feature.builder.FeatureBuilder;
-import org.apache.sling.feature.builder.FeatureExtensionHandler;
-import org.apache.sling.feature.io.file.ArtifactHandler;
-import org.apache.sling.feature.io.file.ArtifactManager;
-import org.apache.sling.feature.io.json.FeatureJSONReader;
-import org.apache.sling.feature.launcher.spi.LauncherPrepareContext;
-import org.apache.sling.feature.launcher.spi.extensions.ExtensionHandler;
 
 public class FeatureProcessor {
 
@@ -70,8 +72,26 @@ public class FeatureProcessor {
                     // ignore
                 }
                 return null;
-            }, config.getVariables(), config.getInstallation().getFrameworkProperties()).add(StreamSupport.stream(Spliterators.spliteratorUnknownSize(
-            ServiceLoader.load(FeatureExtensionHandler.class).iterator(), Spliterator.ORDERED), false).toArray(FeatureExtensionHandler[]::new));
+            },
+            id -> {
+                try {
+                    final ArtifactHandler handler = artifactManager.getArtifactHandler(id.toMvnUrl());
+                    return handler.getFile();
+                } catch (final IOException e) {
+                    // ignore
+                    return null;
+                }
+            },
+            config.getVariables(), config.getInstallation().getFrameworkProperties())
+                .add(StreamSupport.stream(Spliterators.spliteratorUnknownSize(
+                        ServiceLoader.load(FeatureExtensionHandler.class).iterator(), Spliterator.ORDERED), false).toArray(FeatureExtensionHandler[]::new))
+                .addMergeExtensions(StreamSupport.stream(Spliterators.spliteratorUnknownSize(
+                        ServiceLoader.load(MergeHandler.class).iterator(), Spliterator.ORDERED), false)
+                            .toArray(MergeHandler[]::new))
+                .addPostProcessExtensions(StreamSupport.stream(Spliterators.spliteratorUnknownSize(
+                    ServiceLoader.load(PostProcessHandler.class).iterator(), Spliterator.ORDERED), false)
+                        .toArray(PostProcessHandler[]::new));
+
 
         List<Feature> features = new ArrayList<>();
 
