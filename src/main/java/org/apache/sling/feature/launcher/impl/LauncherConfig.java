@@ -16,6 +16,9 @@
  */
 package org.apache.sling.feature.launcher.impl;
 
+import org.apache.sling.feature.io.file.ArtifactManagerConfig;
+import org.apache.sling.feature.io.file.spi.ArtifactProviderContext;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,9 +26,6 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.sling.feature.io.file.ArtifactManagerConfig;
-import org.apache.sling.feature.io.file.spi.ArtifactProviderContext;
 
 /**
  * This class holds the configuration of the launcher.
@@ -39,6 +39,8 @@ public class LauncherConfig
     private static final String CACHE_DIR = "cache";
 
     private final List<String> artifactClashOverrides = new ArrayList<>();
+
+    private final Map<String, Map<String,String>> extensionConfiguration = new HashMap<>();
 
     /** The feature files or directories. */
     private final LinkedHashSet<String> featureFiles = new LinkedHashSet<>();
@@ -63,6 +65,10 @@ public class LauncherConfig
 
     public List<String> getArtifactClashOverrides() {
         return this.artifactClashOverrides;
+    }
+
+    public Map<String, Map<String, String>> getExtensionConfiguration() {
+        return this.extensionConfiguration;
     }
 
     /**
@@ -100,9 +106,15 @@ public class LauncherConfig
     /**
      * Clear all in-memory objects
      */
+    /*
     public void clear() {
+        this.artifactClashOverrides.clear();
+        this.extensionConfiguration.clear();
+        this.featureFiles.clear();
         this.installation.clear();
+        this.variables.clear();
     }
+    */
 
     public Map<String,String> getVariables() {
         return this.variables;

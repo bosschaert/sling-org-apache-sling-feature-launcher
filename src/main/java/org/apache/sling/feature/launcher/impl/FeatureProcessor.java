@@ -89,6 +89,7 @@ public class FeatureProcessor {
         builderContext.addPostProcessExtensions(StreamSupport.stream(Spliterators.spliteratorUnknownSize(
             ServiceLoader.load(PostProcessHandler.class).iterator(), Spliterator.ORDERED), false)
                 .toArray(PostProcessHandler[]::new));
+        builderContext.setHandlerConfiguration(name, cfg)
 
         for (final String initFile : IOUtils.getFeatureFiles(config.getHomeDirectory(), config.getFeatureFiles())) {
             logger.debug("Reading feature file {}", initFile);
