@@ -16,17 +16,6 @@
  */
 package org.apache.sling.feature.launcher.impl;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ServiceLoader;
-import java.util.Spliterator;
-import java.util.Spliterators;
-import java.util.stream.StreamSupport;
-
 import org.apache.sling.feature.Artifact;
 import org.apache.sling.feature.ArtifactId;
 import org.apache.sling.feature.Configuration;
@@ -44,6 +33,17 @@ import org.apache.sling.feature.io.json.FeatureJSONReader;
 import org.apache.sling.feature.launcher.spi.LauncherPrepareContext;
 import org.apache.sling.feature.launcher.spi.extensions.ExtensionHandler;
 import org.slf4j.Logger;
+
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.ServiceLoader;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.StreamSupport;
 
 public class FeatureProcessor {
 
@@ -89,7 +89,9 @@ public class FeatureProcessor {
         builderContext.addPostProcessExtensions(StreamSupport.stream(Spliterators.spliteratorUnknownSize(
             ServiceLoader.load(PostProcessHandler.class).iterator(), Spliterator.ORDERED), false)
                 .toArray(PostProcessHandler[]::new));
-        builderContext.setHandlerConfiguration(name, cfg)
+        for (Map.Entry<String, Map<String,String>> entry : config.getExtensionConfiguration().entrySet()) {
+            builderContext.setHandlerConfiguration(entry.getKey(), entry.getValue());
+        }
 
         for (final String initFile : IOUtils.getFeatureFiles(config.getHomeDirectory(), config.getFeatureFiles())) {
             logger.debug("Reading feature file {}", initFile);

@@ -150,8 +150,14 @@ public class Main {
             }
             if (cl.hasOption(extensionConfiguration.getOpt())) {
                 for(final String optVal : cl.getOptionValues(extensionConfiguration.getOpt())) {
-                    final String [] keyVal = split(optVal);
-                    config.getExtensionConfiguration().put(keyVal[0], keyVal[1]);
+                    Map.Entry<String, Map<String, String>> xc = splitMap(optVal);
+                    Map<String, Map<String, String>> ec = config.getExtensionConfiguration();
+                    Map<String, String> c = ec.get(xc.getKey());
+                    if (c == null) {
+                        c = new HashMap<>();
+                        ec.put(xc.getKey(), c);
+                    }
+                    c.putAll(xc.getValue());
                 }
             }
             if (cl.hasOption(frameworkVersionOption.getOpt())) {
